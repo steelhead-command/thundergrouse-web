@@ -191,13 +191,13 @@ export default function Home() {
               @Steelhead-Command
             </a>
             <a
-              href="https://github.com/Choco-Command"
+              href="https://github.com/ChocolateGrouse"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-lg font-medium transition-colors hover:opacity-90"
               style={{ backgroundColor: 'var(--cream)', color: 'var(--charcoal)' }}
             >
-              @Choco-Command
+              @ChocolateGrouse
             </a>
           </div>
         </div>
