@@ -64,7 +64,15 @@ export function ExternalLink({
   );
 }
 
-export function AppTile({ tile, priority = false }: { tile: Tile; priority?: boolean }) {
+export function AppTile({
+  tile,
+  priority = false,
+  sizes = "(min-width: 1024px) 88px, 64px",
+}: {
+  tile: Tile;
+  priority?: boolean;
+  sizes?: string;
+}) {
   if (tile.type === "image") {
     return (
       <span className={`${s.tile} ${s.tileLg}`}>
@@ -72,7 +80,7 @@ export function AppTile({ tile, priority = false }: { tile: Tile; priority?: boo
           src={tile.src}
           alt={tile.alt}
           className={s.tileImg}
-          sizes="(min-width: 1024px) 88px, 64px"
+          sizes={sizes}
           priority={priority}
         />
       </span>

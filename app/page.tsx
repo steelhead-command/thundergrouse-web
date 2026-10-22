@@ -1,7 +1,9 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { chop, products, studio, waterflow } from "./_home/content";
+import { AppShelf, FlowingCurrent } from "./_home/effects";
 import s from "./_home/home.module.css";
-import { Entry, ExternalIcon, ExternalLink, type EntryData } from "./_home/parts";
+import { AppTile, Entry, ExternalIcon, ExternalLink, type EntryData } from "./_home/parts";
+import type { ShelfItem } from "./_home/scenes";
 
 type Product = (typeof products)[number];
 
@@ -38,6 +40,15 @@ function entryFor(p: Product): EntryData {
     primary: p.links.github,
   };
 }
+
+// One floating 3D tile per product, in the same order as the shelf's links.
+const shelf: ShelfItem[] = products.map((p) => {
+  const { tile } = entryFor(p);
+  return tile.type === "image"
+    ? // width 192 asks the image optimizer for a 384px (2x) texture, not the 1024px file.
+      { kind: p.kind, image: getImageProps({ src: tile.src, alt: "", width: 192 }).props.src }
+    : { kind: p.kind, letter: tile.letter, color: tile.color };
+});
 
 const groups = kinds
   .map((k) => ({ ...k, items: products.filter((p) => p.kind === k.key) }))
@@ -191,6 +202,7 @@ export default function Home() {
       <main className={s.layer}>
         {/* Hero: tagline and intro */}
         <section className={s.hero} aria-labelledby="hero-title">
+          <FlowingCurrent />
           <div className={`${s.container} ${s.heroGrid}`}>
             <p className={s.eyebrow}>
               <span>{studio.legalName}</span>
@@ -211,6 +223,26 @@ export default function Home() {
               <h2 id="apps-title" className={s.h2}>
                 Apps
               </h2>
+            </div>
+
+            {/* App shelf: a link to each entry below. Flat icons hold the 3D tiles' place
+                until they are drawn, and stay where there is no WebGL. */}
+            <div className={s.shelf}>
+              <AppShelf items={shelf} />
+              <ul className={s.shelfLinks}>
+                {products.map(entryFor).map((e) => (
+                  <li key={e.id}>
+                    <a href={`#${e.id}`} className={s.shelfLink}>
+                      {/* The name follows in the link, so the icon needs no alt text. */}
+                      <AppTile
+                        tile={e.tile.type === "image" ? { ...e.tile, alt: "" } : e.tile}
+                        sizes="(min-width: 1024px) 162px, 116px"
+                      />
+                      {e.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {groups.map((g) => (
