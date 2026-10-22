@@ -1,42 +1,17 @@
 @import "tailwindcss";
 
-:root {
-  /* Grouse Feather Color Palette */
-  --cream: #F5F0E6;
-  --deep-brown: #4A3728;
-  --warm-tan: #C4A574;
-  --charcoal: #2D2926;
-  --auburn: #8B5A3C;
-
-  --background: var(--cream);
-  --foreground: var(--deep-brown);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-cream: var(--cream);
-  --color-deep-brown: var(--deep-brown);
-  --color-warm-tan: var(--warm-tan);
-  --color-charcoal: var(--charcoal);
-  --color-auburn: var(--auburn);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* The home page's paper colour (.page in _home/home.module.css), so phone overscroll matches. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #f4f8fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #10171d;
+  }
 }
 
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-}
-
-/* Selection color */
-::selection {
-  background-color: var(--warm-tan);
-  color: var(--charcoal);
 }
