@@ -1,232 +1,347 @@
+import Image from "next/image";
+import { chop, products, studio, waterflow } from "./_home/content";
+import s from "./_home/home.module.css";
+import { Entry, ExternalIcon, ExternalLink, type EntryData } from "./_home/parts";
+
+type Product = (typeof products)[number];
+
+const kinds = [
+  { key: "utility", group: "Utilities" },
+  { key: "game", group: "Games" },
+] as const;
+
+// Map each product in content.ts onto the shared entry anatomy.
+function entryFor(p: Product): EntryData {
+  if (p.kind === "utility") {
+    return {
+      id: "waterflow",
+      name: p.name,
+      status: p.status,
+      live: true,
+      tile: { type: "image", src: p.icon.src, alt: p.icon.alt },
+      summary: p.summary,
+      detail: p.detail,
+      facts: p.facts,
+      primary: p.links.appStore,
+      secondary: [p.links.support, p.links.privacy],
+    };
+  }
+  return {
+    id: "chop",
+    name: p.name,
+    status: p.status,
+    live: false,
+    tone: "warm",
+    tile: { type: "letter", letter: p.name.charAt(0), color: p.color },
+    summary: p.summary,
+    facts: [],
+    primary: p.links.github,
+  };
+}
+
+const groups = kinds
+  .map((k) => ({ ...k, items: products.filter((p) => p.kind === k.key) }))
+  .filter((g) => g.items.length > 0);
+
+// Desktop leads with four features, phone with two; the rest sit in a native
+// disclosure (no JavaScript). "wide" features move into the disclosure on phone.
+const keyNames = ["Home Screen widget", "Map", "Station Detail", "Flow Alerts"];
+const wideNames = ["Map", "Flow Alerts"];
+const byName = (names: string[]) =>
+  names.flatMap((n) => waterflow.features.filter((f) => f.name === n));
+const keyFeatures = byName(keyNames);
+const moreFeatures = waterflow.features.filter((f) => !keyNames.includes(f.name));
+
+type Feature = { name: string; body: string };
+
+function FeatureList({
+  items,
+  className,
+}: {
+  items: readonly Feature[];
+  className?: (f: Feature) => string;
+}) {
+  return (
+    <ul className={s.featureGrid}>
+      {items.map((f) => (
+        <li key={f.name} className={`${s.feature} ${className ? className(f) : ""}`}>
+          <strong className={s.featureName}>{f.name}</strong>
+          <p className={s.featureBody}>{f.body}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Five calm screenshots; the Station Detail card swaps to its dark-mode shot in dark mode.
+const shotOrder = ["widget", "favorites", "detail", "detailDark", "byState", "map"] as const;
+const shots = shotOrder.flatMap((key) => waterflow.screenshots.filter((x) => x.key === key));
+const shotTheme = (key: string) =>
+  key === "detail" ? s.lightOnly : key === "detailDark" ? s.darkOnly : "";
+
+function WaterFlowExtras() {
+  return (
+    <>
+      <div className={s.block}>
+        <div className={s.blockHead}>
+          <h5 className={s.h5}>Screenshots</h5>
+          <span className={s.swipeHint} aria-hidden="true">
+            Swipe for more
+          </span>
+        </div>
+        <ul className={s.shots} tabIndex={0} aria-label="WaterFlow screenshots">
+          {shots.map((shot) => (
+            <li key={shot.key} className={`${s.shot} ${shotTheme(shot.key)}`}>
+              <figure>
+                <Image
+                  src={shot.src}
+                  alt={shot.alt}
+                  className={s.shotImg}
+                  sizes="(min-width: 1184px) 200px, (min-width: 1024px) 18vw, 196px"
+                />
+                <figcaption className={s.shotCaption}>{shot.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className={s.block}>
+        <div className={s.blockHead}>
+          <h5 className={s.h5}>Features</h5>
+        </div>
+        <FeatureList
+          items={keyFeatures}
+          className={(f) => (wideNames.includes(f.name) ? s.wideOnly : "")}
+        />
+        <details className={s.more}>
+          <summary className={s.moreSummary}>
+            <span>More features</span>
+            <svg
+              className={s.moreChevron}
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M2.5 4.5 6 8l3.5-3.5" />
+            </svg>
+          </summary>
+          <div className={s.moreBody}>
+            <FeatureList
+              items={[...byName(wideNames), ...moreFeatures]}
+              className={(f) => (wideNames.includes(f.name) ? s.narrowOnly : "")}
+            />
+          </div>
+        </details>
+      </div>
+
+      <div className={s.smallPrint}>
+        <p>{waterflow.privacy}</p>
+        <p>{waterflow.dataNote}</p>
+      </div>
+    </>
+  );
+}
+
 export default function Home() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--cream)' }}>
-      {/* Hero Section */}
-      <header className="px-6 py-20 md:py-32 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1
-            className="text-5xl md:text-7xl font-bold tracking-tight mb-6"
-            style={{ color: 'var(--deep-brown)' }}
-          >
-            Thundergrouse
-          </h1>
-          <p
-            className="text-xl md:text-2xl mb-8"
-            style={{ color: 'var(--auburn)' }}
-          >
-            iOS Apps Crafted in the Pacific Northwest
-          </p>
-          <p
-            className="text-lg max-w-2xl mx-auto"
-            style={{ color: 'var(--deep-brown)', opacity: 0.8 }}
-          >
-            We build thoughtful, beautifully designed apps for iPhone and iPad.
-          </p>
+    <div className={s.page} id="top">
+      <div className={s.washes} aria-hidden="true">
+        <span className={`${s.wash} ${s.washA}`} />
+        <span className={`${s.wash} ${s.washB}`} />
+        <span className={`${s.wash} ${s.washC}`} />
+      </div>
+
+      <header className={s.masthead}>
+        <div className={s.container}>
+          <div className={s.mastheadInner}>
+            <a href="#top" className={s.wordmark}>
+              {studio.name}
+            </a>
+            <nav aria-label="Sections">
+              <ul className={s.navList}>
+                <li>
+                  <a href="#apps" className={s.navLink}>
+                    Apps
+                  </a>
+                </li>
+                <li>
+                  <a href="#about" className={s.navLink}>
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#open-source" className={s.navLink}>
+                    Open Source
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </header>
 
-      {/* About Section */}
-      <section className="px-6 py-20" style={{ backgroundColor: 'var(--charcoal)' }}>
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl font-bold mb-8 text-center"
-            style={{ color: 'var(--cream)' }}
-          >
-            About Us
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div
-              className="p-6 rounded-lg"
-              style={{ backgroundColor: 'var(--deep-brown)' }}
-            >
-              <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--warm-tan)' }}>
-                Who We Are
-              </h3>
-              <p style={{ color: 'var(--cream)', opacity: 0.9 }}>
-                Thundergrouse is a two-person studio founded by brothers Luke and John Stanley.
-                Based in Washington State, we create iOS applications that respect your time and attention.
-              </p>
-            </div>
-            <div
-              className="p-6 rounded-lg"
-              style={{ backgroundColor: 'var(--deep-brown)' }}
-            >
-              <h3 className="text-xl font-semibold mb-3" style={{ color: 'var(--warm-tan)' }}>
-                Our Philosophy
-              </h3>
-              <p style={{ color: 'var(--cream)', opacity: 0.9 }}>
-                We believe apps should enhance your life, not consume it.
-                Every feature we build is intentional, every interaction considered.
-                Quality over quantity, always.
-              </p>
-            </div>
+      <main className={s.layer}>
+        {/* Hero: tagline and intro */}
+        <section className={s.hero} aria-labelledby="hero-title">
+          <div className={`${s.container} ${s.heroGrid}`}>
+            <p className={s.eyebrow}>
+              <span>{studio.legalName}</span>
+              <span className={s.eyebrowSep} aria-hidden="true" />
+              <span>{studio.location}</span>
+            </p>
+            <h1 id="hero-title" className={s.h1}>
+              {studio.tagline}
+            </h1>
+            <p className={s.intro}>{studio.intro}</p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Apps Section */}
-      <section className="px-6 py-20" style={{ backgroundColor: 'var(--cream)' }}>
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl font-bold mb-12 text-center"
-            style={{ color: 'var(--deep-brown)' }}
-          >
-            Our Apps
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* CHOP */}
-            <div
-              className="p-8 rounded-xl border-2 transition-transform hover:scale-105"
-              style={{
-                backgroundColor: 'white',
-                borderColor: 'var(--warm-tan)',
-              }}
-            >
-              <div
-                className="w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-2xl"
-                style={{ backgroundColor: 'var(--auburn)' }}
+        {/* Catalogue */}
+        <section id="apps" className={`${s.section} ${s.sectionTight} ${s.sectionFlushEnd}`} aria-labelledby="apps-title">
+          <div className={`${s.container} ${s.layer}`}>
+            <div className={s.sectionHead}>
+              <h2 id="apps-title" className={s.h2}>
+                Apps
+              </h2>
+            </div>
+
+            {groups.map((g) => (
+              <section
+                key={g.key}
+                className={`${s.group} ${g.key === "game" ? s.warm : ""}`}
+                aria-labelledby={`group-${g.key}`}
               >
-                🪓
+                <div className={s.groupHead}>
+                  <h3 id={`group-${g.key}`} className={s.h3}>
+                    {g.group}
+                  </h3>
+                  <span className={s.groupRule} aria-hidden="true" />
+                </div>
+                <ul className={s.entryList}>
+                  {g.items.map((p, i) => {
+                    const e = entryFor(p);
+                    return (
+                      <li key={e.id}>
+                        <Entry entry={e} priority={g.key === "utility" && i === 0}>
+                          {p.kind === "utility" ? <WaterFlowExtras /> : null}
+                        </Entry>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </section>
+
+        {/* About Us */}
+        <section id="about" className={s.section} aria-labelledby="about-title">
+          <div className={s.washes} aria-hidden="true">
+            <span className={`${s.wash} ${s.washD}`} />
+            <span className={`${s.wash} ${s.washE}`} />
+          </div>
+          <div className={`${s.container} ${s.layer}`}>
+            <div className={s.sectionHead}>
+              <h2 id="about-title" className={s.h2}>
+                {studio.about.heading}
+              </h2>
+            </div>
+            <div className={s.note}>
+              <div className={s.noteCol}>
+                <h3 className={s.noteHeading}>{studio.about.who.heading}</h3>
+                <p className={s.noteBody}>{studio.about.who.body}</p>
               </div>
-              <h3
-                className="text-2xl font-bold mb-2"
-                style={{ color: 'var(--deep-brown)' }}
-              >
-                CHOP
-              </h3>
-              <span
-                className="inline-block px-3 py-1 rounded-full text-sm mb-4"
-                style={{ backgroundColor: 'var(--warm-tan)', color: 'var(--charcoal)' }}
-              >
-                In Development
-              </span>
-              <p
-                className="mb-4"
-                style={{ color: 'var(--deep-brown)', opacity: 0.8 }}
-              >
-                A satisfying wood chopping arcade game with furnace crafting and gathering mechanics.
-                Simple to play, hard to master.
-              </p>
-              <a
-                href="https://github.com/Steelhead-Command/CHOP"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-medium hover:underline"
-                style={{ color: 'var(--auburn)' }}
-              >
-                View on GitHub →
-              </a>
-            </div>
-
-            {/* Water Flow */}
-            <div
-              className="p-8 rounded-xl border-2 transition-transform hover:scale-105"
-              style={{
-                backgroundColor: 'white',
-                borderColor: 'var(--warm-tan)',
-              }}
-            >
-              <div
-                className="w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-2xl"
-                style={{ backgroundColor: 'var(--deep-brown)' }}
-              >
-                🌊
+              <div className={s.noteCol}>
+                <h3 className={s.noteHeading}>{studio.about.philosophy.heading}</h3>
+                <p className={s.noteBody}>{studio.about.philosophy.body}</p>
               </div>
-              <h3
-                className="text-2xl font-bold mb-2"
-                style={{ color: 'var(--deep-brown)' }}
-              >
-                Water Flow
-              </h3>
-              <span
-                className="inline-block px-3 py-1 rounded-full text-sm mb-4"
-                style={{ backgroundColor: 'var(--charcoal)', color: 'var(--cream)' }}
-              >
-                Coming Soon
-              </span>
-              <p
-                className="mb-4"
-                style={{ color: 'var(--deep-brown)', opacity: 0.8 }}
-              >
-                River and stream conditions for the Pacific Northwest.
-                Flow rates, fishing conditions, and kayak readiness at your fingertips.
-              </p>
-              <span
-                className="inline-flex items-center gap-2"
-                style={{ color: 'var(--auburn)', opacity: 0.6 }}
-              >
-                Stay tuned...
-              </span>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* GitHub Section */}
-      <section
-        className="px-6 py-20"
-        style={{ backgroundColor: 'var(--deep-brown)' }}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <h2
-            className="text-3xl md:text-4xl font-bold mb-8"
-            style={{ color: 'var(--cream)' }}
-          >
-            Open Source
-          </h2>
-          <p
-            className="text-lg mb-8 max-w-2xl mx-auto"
-            style={{ color: 'var(--cream)', opacity: 0.8 }}
-          >
-            Check out our work on GitHub. We believe in building in the open.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://github.com/Steelhead-Command"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-lg font-medium transition-colors hover:opacity-90"
-              style={{ backgroundColor: 'var(--warm-tan)', color: 'var(--charcoal)' }}
-            >
-              @Steelhead-Command
-            </a>
-            <a
-              href="https://github.com/ChocolateGrouse"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-lg font-medium transition-colors hover:opacity-90"
-              style={{ backgroundColor: 'var(--cream)', color: 'var(--charcoal)' }}
-            >
-              @ChocolateGrouse
-            </a>
+        {/* Open Source */}
+        <section
+          id="open-source"
+          className={`${s.section} ${s.sectionTight}`}
+          aria-labelledby="open-source-title"
+        >
+          <div className={`${s.container} ${s.layer}`}>
+            <div className={s.sectionHead}>
+              <div>
+                <h2 id="open-source-title" className={s.h2}>
+                  {studio.openSource.heading}
+                </h2>
+                <p className={s.sectionLede}>{studio.openSource.body}</p>
+              </div>
+            </div>
+            <ul className={s.repoGrid}>
+              {studio.openSource.links.map((l) => (
+                <li key={l.href}>
+                  <ExternalLink href={l.href} className={`${s.card} ${s.repoCard}`}>
+                    <span className={s.repoText}>
+                      <span className={s.repoHost}>GitHub</span>
+                      <span className={s.repoHandle}>{l.label}</span>
+                    </span>
+                    <span className={s.repoGo} aria-hidden="true">
+                      <ExternalIcon size={13} />
+                    </span>
+                  </ExternalLink>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer
-        className="px-6 py-12"
-        style={{ backgroundColor: 'var(--charcoal)' }}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <p
-            className="text-lg font-semibold mb-2"
-            style={{ color: 'var(--cream)' }}
-          >
-            Thundergrouse LLC
-          </p>
-          <p
-            className="mb-4"
-            style={{ color: 'var(--cream)', opacity: 0.6 }}
-          >
-            Woodland, Washington
-          </p>
-          <p
-            className="text-sm"
-            style={{ color: 'var(--cream)', opacity: 0.4 }}
-          >
-            © 2025 Thundergrouse LLC. All rights reserved.
-          </p>
+      <footer className={s.footer}>
+        <div className={s.container}>
+          <div className={s.footerInner}>
+            <div className={s.footerGrid}>
+              <div className={s.footerBrand}>
+                <p className={s.footerName}>{studio.legalName}</p>
+                <p className={s.footerPlace}>{studio.location}</p>
+              </div>
+              <div>
+                <p className={`${s.label} ${s.footerLabel}`}>{waterflow.shortName}</p>
+                <ul className={s.footerLinks}>
+                  <li>
+                    <ExternalLink href={waterflow.links.appStore.href} className={s.link}>
+                      App Store
+                    </ExternalLink>
+                  </li>
+                  <li>
+                    <ExternalLink href={waterflow.links.support.href} className={s.link}>
+                      {waterflow.links.support.label}
+                    </ExternalLink>
+                  </li>
+                  <li>
+                    <ExternalLink href={waterflow.links.privacy.href} className={s.link}>
+                      {waterflow.links.privacy.label}
+                    </ExternalLink>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className={`${s.label} ${s.footerLabel}`}>{chop.name}</p>
+                <ul className={s.footerLinks}>
+                  <li>
+                    <ExternalLink href={chop.links.github.href} className={s.link}>
+                      GitHub
+                    </ExternalLink>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <p className={s.copyright}>{studio.copyright}</p>
+          </div>
         </div>
       </footer>
     </div>

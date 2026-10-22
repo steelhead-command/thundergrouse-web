@@ -1,49 +1,27 @@
 import Link from 'next/link';
+import s from './_home/home.module.css';
 
 export default function NotFound() {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ backgroundColor: 'var(--cream)' }}
-    >
-      <div className="text-center max-w-md">
-        <div
-          className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center text-5xl"
-          style={{ backgroundColor: 'var(--warm-tan)' }}
-        >
-          🐓
-        </div>
-        <h1
-          className="text-6xl md:text-7xl font-bold mb-4"
-          style={{ color: 'var(--deep-brown)' }}
-        >
-          404
-        </h1>
-        <h2
-          className="text-2xl md:text-3xl font-semibold mb-4"
-          style={{ color: 'var(--auburn)' }}
-        >
-          Page not found
-        </h2>
-        <p
-          className="text-lg mb-8"
-          style={{ color: 'var(--deep-brown)', opacity: 0.7 }}
-        >
+    <div className={`${s.page} ${s.notice}`}>
+      <div className={s.washes} aria-hidden="true">
+        <span className={`${s.wash} ${s.washA}`} />
+        <span className={`${s.wash} ${s.washB}`} />
+      </div>
+      <main className={`${s.container} ${s.layer}`}>
+        <p className={s.label}>404</p>
+        <h1 className={s.h1}>Page not found</h1>
+        <p className={s.intro}>
           This grouse has flown the coop. The page you&apos;re looking for doesn&apos;t exist.
         </p>
-        <Link
-          href="/"
-          className="inline-block px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
-          style={{ backgroundColor: 'var(--auburn)', color: 'var(--cream)' }}
-        >
-          Back to Home
-        </Link>
-      </div>
-      <footer
-        className="absolute bottom-8 text-center"
-        style={{ color: 'var(--deep-brown)', opacity: 0.5 }}
-      >
-        <p className="text-sm">Thundergrouse LLC</p>
+        <div className={s.block}>
+          <Link href="/" className={`${s.button} ${s.buttonPrimary}`}>
+            Back to Home
+          </Link>
+        </div>
+      </main>
+      <footer className={s.footer}>
+        <p className={`${s.container} ${s.footerPlace}`}>Thundergrouse LLC</p>
       </footer>
     </div>
   );
